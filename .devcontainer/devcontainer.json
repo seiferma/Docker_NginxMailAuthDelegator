@@ -1,0 +1,22 @@
+{
+	"name": "Ubuntu",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": { "VARIANT": "jammy" }
+	},
+	"workspaceMount": "",
+	"runArgs": [ "--userns=keep-id", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined", "--volume=${localWorkspaceFolder}:/workspaces/${localWorkspaceFolderBasename}:Z" ],
+	"settings": {
+		"go.toolsManagement.checkForUpdates": "local",
+		"go.useLanguageServer": true,
+		"go.gopath": "/home/vscode/go"
+	},
+	"extensions": [
+		"golang.Go",
+		"ms-vscode.makefile-tools",
+		"markis.code-coverage"
+	],
+	"forwardPorts": [8080],
+	"remoteUser": "vscode",
+	"containerUser": "vscode"
+}

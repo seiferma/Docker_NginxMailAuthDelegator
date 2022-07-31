@@ -1,0 +1,8 @@
+users:
+  - some_user
+  - another_user
+  - test@example.org
+imap_host: imap.example.org
+smtp_host: smtp.example.org
+smtp_user: barfoo
+smtp_pass: foobar
