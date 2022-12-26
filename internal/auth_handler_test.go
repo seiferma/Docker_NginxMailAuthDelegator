@@ -127,7 +127,7 @@ func createAuthHandler(t *testing.T, validator ImapValidator) AuthHandler {
 	asserts.AssertNil(t, err)
 
 	cache_entry_validity, _ := time.ParseDuration("2s")
-	handler := CreateAuthHandlerWithCustomValidator(cfg, validator, cache_entry_validity)
+	handler := CreateAuthHandlerWithCustomCallbacks(cfg, validator, cache_entry_validity)
 	asserts.AssertNonNil(t, handler)
 	return handler
 }

@@ -13,7 +13,7 @@ import (
 
 func TestInvalidRequestMissingAttempts(t *testing.T) {
 	w := httptest.NewRecorder()
-	r := createRequest(1, "plain", "smtp", "foo", "bar")
+	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
 	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
 		return false, true
 	})
@@ -25,9 +25,23 @@ func TestInvalidRequestMissingAttempts(t *testing.T) {
 	asserts.AssertEquals(t, "", w.Header().Get("Auth-Wait"))
 }
 
+func TestInvalidRequestMissingClientIp(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
+	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+		return false, true
+	})
+	r.Header.Del("Client-IP")
+
+	http_handler(w, r, &auth_handler)
+
+	asserts.AssertNotEquals(t, "OK", w.Header().Get("Auth-Status"))
+	asserts.AssertEquals(t, "", w.Header().Get("Auth-Wait"))
+}
+
 func TestInvalidRequestMissingProtocol(t *testing.T) {
 	w := httptest.NewRecorder()
-	r := createRequest(1, "plain", "smtp", "foo", "bar")
+	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
 	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
 		return false, true
 	})
@@ -41,7 +55,7 @@ func TestInvalidRequestMissingProtocol(t *testing.T) {
 
 func TestInvalidRequestUnsupportedMethod(t *testing.T) {
 	w := httptest.NewRecorder()
-	r := createRequest(1, "cram-md5", "smtp", "foo", "bar")
+	r := createRequest(1, "cram-md5", "smtp", "foo", "bar", "127.0.0.1")
 	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
 		return false, true
 	})
@@ -54,7 +68,7 @@ func TestInvalidRequestUnsupportedMethod(t *testing.T) {
 
 func TestInvalidRequestUsingMutualTls(t *testing.T) {
 	w := httptest.NewRecorder()
-	r := createRequest(1, "plain", "smtp", "foo", "bar")
+	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
 	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
 		return false, true
 	})
@@ -68,7 +82,7 @@ func TestInvalidRequestUsingMutualTls(t *testing.T) {
 
 func TestInvalidSmtpCredentialsAuthRequest(t *testing.T) {
 	w := httptest.NewRecorder()
-	r := createRequest(1, "plain", "smtp", "foo", "bar")
+	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
 	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
 		return false, true
 	})
@@ -82,7 +96,7 @@ func TestInvalidSmtpCredentialsAuthRequest(t *testing.T) {
 
 func TestInvalidImapCredentialsAuthRequest(t *testing.T) {
 	w := httptest.NewRecorder()
-	r := createRequest(1, "plain", "imap", "foo", "bar")
+	r := createRequest(1, "plain", "imap", "foo", "bar", "127.0.0.1")
 	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
 		return false, true
 	})
@@ -96,7 +110,7 @@ func TestInvalidImapCredentialsAuthRequest(t *testing.T) {
 
 func TestInvalidCredentialsTooManyTriesAuthRequest(t *testing.T) {
 	w := httptest.NewRecorder()
-	r := createRequest(3, "plain", "imap", "foo", "bar")
+	r := createRequest(3, "plain", "imap", "foo", "bar", "127.0.0.1")
 	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
 		return false, true
 	})
@@ -109,7 +123,7 @@ func TestInvalidCredentialsTooManyTriesAuthRequest(t *testing.T) {
 
 func TestValidImapCredentialsAuthRequest(t *testing.T) {
 	w := httptest.NewRecorder()
-	r := createRequest(1, "plain", "imap", "foo", "bar")
+	r := createRequest(1, "plain", "imap", "foo", "bar", "127.0.0.1")
 	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
 		return true, true
 	})
@@ -125,7 +139,7 @@ func TestValidImapCredentialsAuthRequest(t *testing.T) {
 
 func TestValidImtpCredentialsAuthRequest(t *testing.T) {
 	w := httptest.NewRecorder()
-	r := createRequest(1, "plain", "smtp", "foo", "bar")
+	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
 	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
 		return true, true
 	})
@@ -148,16 +162,17 @@ func createAuthHandler(imapValidator internal.ImapValidator) internal.AuthHandle
 		SmtpPass:         "pp",
 	}
 	cache_entry_validity, _ := time.ParseDuration("3s")
-	return internal.CreateAuthHandlerWithCustomValidator(cfg, imapValidator, cache_entry_validity)
+	return internal.CreateAuthHandlerWithCustomCallbacks(cfg, imapValidator, cache_entry_validity)
 }
 
-func createRequest(attempt int, method, protocol, user, password string) *http.Request {
+func createRequest(attempt int, method, protocol, user, password, client_ip string) *http.Request {
 	r := httptest.NewRequest("GET", "/auth", nil)
 	r.Header.Add("Auth-Login-Attempt", strconv.Itoa(attempt))
 	addHeaderIfNotEmpty(r, "Auth-Method", method)
 	addHeaderIfNotEmpty(r, "Auth-User", user)
 	addHeaderIfNotEmpty(r, "Auth-Pass", password)
 	addHeaderIfNotEmpty(r, "Auth-Protocol", protocol)
+	addHeaderIfNotEmpty(r, "Client-IP", client_ip)
 	return r
 }
 

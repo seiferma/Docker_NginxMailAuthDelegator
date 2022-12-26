@@ -49,6 +49,12 @@ func http_handler(w http.ResponseWriter, r *http.Request, auth_handler *internal
 		return
 	}
 
+	client_ip := r.Header.Get("Client-IP")
+	if client_ip == "" {
+		report_error(auth_protocol, "internal error (client ip missing)", "", -1, w)
+		return
+	}
+
 	auth_method := r.Header.Get("Auth-Method")
 	if auth_method != "plain" {
 		report_error(auth_protocol, "only plain authentication is supported", "504 5.5.4", auth_attempt+1, w)
@@ -67,8 +73,14 @@ func http_handler(w http.ResponseWriter, r *http.Request, auth_handler *internal
 	auth_response := auth_handler.HandleAuthRequest(auth_protocol, auth_user, auth_pass, auth_attempt)
 
 	if auth_response.Status == "OK" {
+		if client_ip != "" {
+			log.Printf("client [%v] successfully authenticated.", client_ip)
+		}
 		report_success(auth_response.Server, strconv.Itoa(auth_response.Port), auth_response.User, auth_response.Password, w)
 	} else {
+		if client_ip != "" {
+			log.Printf("client [%v] did not provide valid credentials.", client_ip)
+		}
 		report_error(auth_protocol, auth_response.Status, auth_response.Error_code, auth_response.Wait, w)
 	}
 }

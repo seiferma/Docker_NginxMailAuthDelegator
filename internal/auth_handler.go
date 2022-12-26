@@ -9,7 +9,7 @@ import (
 
 const MAX_RETRIES = 3
 
-type cacheEntry struct {
+type authCacheEntry struct {
 	username      string
 	password_hash []byte
 	expiry        time.Time
@@ -19,7 +19,7 @@ type ImapValidator func(imap_host, user, pass string) (bool, bool)
 
 type AuthHandler struct {
 	valid_usernames      []string
-	auth_cache           map[string]cacheEntry
+	auth_cache           map[string]authCacheEntry
 	cache_entry_validity time.Duration
 	imap_host            string
 	smtp_host            string
@@ -40,10 +40,10 @@ type AuthResponse struct {
 
 func CreateAuthHandler(cfg Configuration) AuthHandler {
 	cache_entry_validity, _ := time.ParseDuration("15m")
-	return CreateAuthHandlerWithCustomValidator(cfg, credentialsValidInImap, cache_entry_validity)
+	return CreateAuthHandlerWithCustomCallbacks(cfg, credentialsValidInImap, cache_entry_validity)
 }
 
-func CreateAuthHandlerWithCustomValidator(cfg Configuration, imap_validator ImapValidator, cache_entry_validity time.Duration) AuthHandler {
+func CreateAuthHandlerWithCustomCallbacks(cfg Configuration, imap_validator ImapValidator, cache_entry_validity time.Duration) AuthHandler {
 	return AuthHandler{
 		valid_usernames:      cfg.WhitelistedUsers,
 		imap_host:            cfg.ImapServer,
@@ -52,7 +52,7 @@ func CreateAuthHandlerWithCustomValidator(cfg Configuration, imap_validator Imap
 		smtp_user:            cfg.SmtpUser,
 		smtp_password:        cfg.SmtpPass,
 		cache_entry_validity: cache_entry_validity,
-		auth_cache:           make(map[string]cacheEntry),
+		auth_cache:           make(map[string]authCacheEntry),
 	}
 }
 
@@ -141,7 +141,7 @@ func (handler *AuthHandler) addCredentialsToCache(user string, pass []byte) erro
 	// add entry to cache
 	password_hash, err := bcrypt.GenerateFromPassword(pass, 10)
 	if err == nil {
-		cache_entry := cacheEntry{
+		cache_entry := authCacheEntry{
 			username:      user,
 			password_hash: password_hash,
 			expiry:        time.Now().Add(handler.cache_entry_validity),
