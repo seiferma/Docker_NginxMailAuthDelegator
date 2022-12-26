@@ -3,6 +3,8 @@ package internal
 import (
 	"testing"
 	"time"
+
+	"github.com/seiferma/nginxmailauthdelegator/internal/asserts"
 )
 
 func TestNonWhitelistedCredentialsAuthHandler(t *testing.T) {
@@ -11,9 +13,9 @@ func TestNonWhitelistedCredentialsAuthHandler(t *testing.T) {
 		return false, false
 	})
 	response := handler.HandleAuthRequest("imap", "test", "test", 3)
-	assertEquals(t, "Invalid login or password", response.Status)
-	assertEquals(t, "535 5.7.8", response.Error_code)
-	assertEquals(t, -1, response.Wait)
+	asserts.AssertEquals(t, "Invalid login or password", response.Status)
+	asserts.AssertEquals(t, "535 5.7.8", response.Error_code)
+	asserts.AssertEquals(t, -1, response.Wait)
 }
 
 func TestInvalidWhitelistedCredentialsAuthHandler(t *testing.T) {
@@ -21,9 +23,9 @@ func TestInvalidWhitelistedCredentialsAuthHandler(t *testing.T) {
 		return false, true
 	})
 	response := handler.HandleAuthRequest("imap", "test@example.org", "test", 1)
-	assertEquals(t, "Invalid login or password", response.Status)
-	assertEquals(t, "535 5.7.8", response.Error_code)
-	assertEquals(t, 2, response.Wait)
+	asserts.AssertEquals(t, "Invalid login or password", response.Status)
+	asserts.AssertEquals(t, "535 5.7.8", response.Error_code)
+	asserts.AssertEquals(t, 2, response.Wait)
 }
 
 func TestInvalidCredentialsMaxTriesAuthHandler(t *testing.T) {
@@ -32,9 +34,9 @@ func TestInvalidCredentialsMaxTriesAuthHandler(t *testing.T) {
 		return false, false
 	})
 	response := handler.HandleAuthRequest("imap", "test", "test", 1)
-	assertEquals(t, "Invalid login or password", response.Status)
-	assertEquals(t, "535 5.7.8", response.Error_code)
-	assertEquals(t, 2, response.Wait)
+	asserts.AssertEquals(t, "Invalid login or password", response.Status)
+	asserts.AssertEquals(t, "535 5.7.8", response.Error_code)
+	asserts.AssertEquals(t, 2, response.Wait)
 }
 
 func TestValidCredentialsForIMAPAuthHandler(t *testing.T) {
@@ -42,11 +44,11 @@ func TestValidCredentialsForIMAPAuthHandler(t *testing.T) {
 		return true, true
 	})
 	response := handler.HandleAuthRequest("imap", "test@example.org", "test", 1)
-	assertEquals(t, "OK", response.Status)
-	assertEquals(t, "imap.example.org", response.Server)
-	assertEquals(t, 993, response.Port)
-	assertEquals(t, "", response.User)
-	assertEquals(t, "", response.Password)
+	asserts.AssertEquals(t, "OK", response.Status)
+	asserts.AssertEquals(t, "imap.example.org", response.Server)
+	asserts.AssertEquals(t, 993, response.Port)
+	asserts.AssertEquals(t, "", response.User)
+	asserts.AssertEquals(t, "", response.Password)
 }
 
 func TestValidCredentialsForSMTPAuthHandler(t *testing.T) {
@@ -54,11 +56,11 @@ func TestValidCredentialsForSMTPAuthHandler(t *testing.T) {
 		return true, true
 	})
 	response := handler.HandleAuthRequest("smtp", "test@example.org", "test", 1)
-	assertEquals(t, "OK", response.Status)
-	assertEquals(t, "smtp.example.org", response.Server)
-	assertEquals(t, 587, response.Port)
-	assertEquals(t, "barfoo", response.User)
-	assertEquals(t, "foobar", response.Password)
+	asserts.AssertEquals(t, "OK", response.Status)
+	asserts.AssertEquals(t, "smtp.example.org", response.Server)
+	asserts.AssertEquals(t, 587, response.Port)
+	asserts.AssertEquals(t, "barfoo", response.User)
+	asserts.AssertEquals(t, "foobar", response.Password)
 }
 
 func TestValidCachedCredentialsAuthHandler(t *testing.T) {
@@ -70,13 +72,13 @@ func TestValidCachedCredentialsAuthHandler(t *testing.T) {
 		return true, true
 	})
 	response := handler.HandleAuthRequest("imap", "test@example.org", "test", 1)
-	assertEquals(t, "OK", response.Status)
+	asserts.AssertEquals(t, "OK", response.Status)
 	response = handler.HandleAuthRequest("imap", "test@example.org", "test", 1)
-	assertEquals(t, "OK", response.Status)
-	assertEquals(t, "imap.example.org", response.Server)
-	assertEquals(t, 993, response.Port)
-	assertEquals(t, "", response.User)
-	assertEquals(t, "", response.Password)
+	asserts.AssertEquals(t, "OK", response.Status)
+	asserts.AssertEquals(t, "imap.example.org", response.Server)
+	asserts.AssertEquals(t, 993, response.Port)
+	asserts.AssertEquals(t, "", response.User)
+	asserts.AssertEquals(t, "", response.Password)
 }
 
 func TestValidCachedButExpiredCredentialsAuthHandler(t *testing.T) {
@@ -86,21 +88,21 @@ func TestValidCachedButExpiredCredentialsAuthHandler(t *testing.T) {
 		return true, true
 	})
 	response := handler.HandleAuthRequest("imap", "test@example.org", "test", 1)
-	assertEquals(t, "OK", response.Status)
+	asserts.AssertEquals(t, "OK", response.Status)
 
 	// wait for cache entry to expire
 	time.Sleep(3 * time.Second)
 
 	// try again
 	response = handler.HandleAuthRequest("imap", "test@example.org", "test", 1)
-	assertEquals(t, "OK", response.Status)
-	assertEquals(t, "imap.example.org", response.Server)
-	assertEquals(t, 993, response.Port)
-	assertEquals(t, "", response.User)
-	assertEquals(t, "", response.Password)
+	asserts.AssertEquals(t, "OK", response.Status)
+	asserts.AssertEquals(t, "imap.example.org", response.Server)
+	asserts.AssertEquals(t, 993, response.Port)
+	asserts.AssertEquals(t, "", response.User)
+	asserts.AssertEquals(t, "", response.Password)
 
 	// assert validator calls
-	assertEquals(t, 2, validator_calls)
+	asserts.AssertEquals(t, 2, validator_calls)
 }
 
 func TestInvalidCachedCredentialsAuthHandler(t *testing.T) {
@@ -112,20 +114,20 @@ func TestInvalidCachedCredentialsAuthHandler(t *testing.T) {
 		return true, true
 	})
 	response := handler.HandleAuthRequest("imap", "test@example.org", "test", 1)
-	assertEquals(t, "OK", response.Status)
+	asserts.AssertEquals(t, "OK", response.Status)
 	response = handler.HandleAuthRequest("imap", "test@example.org", "test2", 1)
-	assertEquals(t, "Invalid login or password", response.Status)
-	assertEquals(t, "535 5.7.8", response.Error_code)
-	assertEquals(t, 2, response.Wait)
+	asserts.AssertEquals(t, "Invalid login or password", response.Status)
+	asserts.AssertEquals(t, "535 5.7.8", response.Error_code)
+	asserts.AssertEquals(t, 2, response.Wait)
 }
 
-func createAuthHandler(t *testing.T, validator imapValidator) AuthHandler {
+func createAuthHandler(t *testing.T, validator ImapValidator) AuthHandler {
 	var cfg Configuration
 	err := cfg.Load("testdata/config.yaml")
-	assertNil(t, err)
+	asserts.AssertNil(t, err)
 
 	cache_entry_validity, _ := time.ParseDuration("2s")
-	handler := createAuthHandlerWithCustomValidator(cfg, validator, cache_entry_validity)
-	assertNonNil(t, handler)
+	handler := CreateAuthHandlerWithCustomValidator(cfg, validator, cache_entry_validity)
+	asserts.AssertNonNil(t, handler)
 	return handler
 }

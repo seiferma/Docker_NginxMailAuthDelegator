@@ -51,13 +51,13 @@ func http_handler(w http.ResponseWriter, r *http.Request, auth_handler *internal
 
 	auth_method := r.Header.Get("Auth-Method")
 	if auth_method != "plain" {
-		report_error(auth_protocol, "only plain authentication is supported", "504 5.5.4", auth_attempt, w)
+		report_error(auth_protocol, "only plain authentication is supported", "504 5.5.4", auth_attempt+1, w)
 		return
 	}
 
 	auth_ssl := r.Header.Get("Auth-SSL")
 	if auth_ssl != "" && auth_ssl != "off" {
-		report_error(auth_protocol, "client certificates are not supported", "504 5.5.4", auth_attempt, w)
+		report_error(auth_protocol, "client certificates are not supported", "504 5.5.4", auth_attempt+1, w)
 		return
 	}
 
@@ -86,13 +86,13 @@ func report_success(server, port, user, password string, w http.ResponseWriter) 
 	w.WriteHeader(200)
 }
 
-func report_error(auth_protocol, reason, smtp_code string, previous_tries int, w http.ResponseWriter) {
+func report_error(auth_protocol, reason, smtp_code string, tries int, w http.ResponseWriter) {
 	w.Header().Add("Auth-Status", reason)
 	if auth_protocol == "smtp" {
 		w.Header().Add("Auth-Error-Code", smtp_code)
 	}
-	if previous_tries > 0 {
-		w.Header().Add("Auth-Wait", strconv.Itoa(previous_tries+1))
+	if tries > 0 {
+		w.Header().Add("Auth-Wait", strconv.Itoa(tries))
 	}
 	w.WriteHeader(200)
 }

@@ -2,17 +2,19 @@ package internal
 
 import (
 	"testing"
+
+	"github.com/seiferma/nginxmailauthdelegator/internal/asserts"
 )
 
 func TestReadingMissingConfigFile(t *testing.T) {
 	var cfg Configuration
 	err := cfg.Load("testdata/config_doesnotexist.yaml")
-	assertNonNil(t, err)
+	asserts.AssertNonNil(t, err)
 }
 func TestReadingBrokenConfigFile(t *testing.T) {
 	var cfg Configuration
 	err := cfg.Load("testdata/config_brokensyntax.yaml")
-	assertNonNil(t, err)
+	asserts.AssertNonNil(t, err)
 }
 
 func TestReadingConfigFile(t *testing.T) {
@@ -21,10 +23,10 @@ func TestReadingConfigFile(t *testing.T) {
 	var cfg Configuration
 	err := cfg.Load("testdata/config.yaml")
 
-	assertNil(t, err)
-	assertStringEquals(t, "imap.example.org", cfg.ImapServer)
-	assertStringEquals(t, "smtp.example.org", cfg.SmtpServer)
-	assertStringEquals(t, "barfoo", cfg.SmtpUser)
-	assertStringEquals(t, "foobar", cfg.SmtpPass)
-	assertStringArraysEquals(t, expected_users[:], cfg.WhitelistedUsers)
+	asserts.AssertNil(t, err)
+	asserts.AssertEquals(t, "imap.example.org", cfg.ImapServer)
+	asserts.AssertEquals(t, "smtp.example.org", cfg.SmtpServer)
+	asserts.AssertEquals(t, "barfoo", cfg.SmtpUser)
+	asserts.AssertEquals(t, "foobar", cfg.SmtpPass)
+	asserts.AssertStringArraysEquals(t, expected_users[:], cfg.WhitelistedUsers)
 }

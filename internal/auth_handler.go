@@ -15,7 +15,7 @@ type cacheEntry struct {
 	expiry        time.Time
 }
 
-type imapValidator func(imap_host, user, pass string) (bool, bool)
+type ImapValidator func(imap_host, user, pass string) (bool, bool)
 
 type AuthHandler struct {
 	valid_usernames      []string
@@ -25,7 +25,7 @@ type AuthHandler struct {
 	smtp_host            string
 	smtp_user            string
 	smtp_password        string
-	imap_validator       imapValidator
+	imap_validator       ImapValidator
 }
 
 type AuthResponse struct {
@@ -40,10 +40,10 @@ type AuthResponse struct {
 
 func CreateAuthHandler(cfg Configuration) AuthHandler {
 	cache_entry_validity, _ := time.ParseDuration("15m")
-	return createAuthHandlerWithCustomValidator(cfg, credentialsValidInImap, cache_entry_validity)
+	return CreateAuthHandlerWithCustomValidator(cfg, credentialsValidInImap, cache_entry_validity)
 }
 
-func createAuthHandlerWithCustomValidator(cfg Configuration, imap_validator imapValidator, cache_entry_validity time.Duration) AuthHandler {
+func CreateAuthHandlerWithCustomValidator(cfg Configuration, imap_validator ImapValidator, cache_entry_validity time.Duration) AuthHandler {
 	return AuthHandler{
 		valid_usernames:      cfg.WhitelistedUsers,
 		imap_host:            cfg.ImapServer,

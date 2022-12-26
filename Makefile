@@ -1,5 +1,5 @@
-APPNAME:=nginx-auth-delegator
-IMAGE_NAME:=nginx-auth-delegator
+APPNAME:=nginx-mail-auth-delegator
+IMAGE_NAME:=nginx-mail-auth-delegator
 RELEASE?=0
 CGO_ENABLED?=0
 
