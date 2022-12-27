@@ -32,6 +32,7 @@ func main() {
 	http.HandleFunc("/auth", func(w http.ResponseWriter, r *http.Request) {
 		http_handler(w, r, &auth_handler)
 	})
+	log.Printf("Started")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
