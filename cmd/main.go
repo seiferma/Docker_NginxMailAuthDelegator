@@ -29,6 +29,9 @@ func main() {
 	}
 
 	auth_handler := internal.CreateAuthHandler(config)
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("OK"))
+	})
 	http.HandleFunc("/auth", func(w http.ResponseWriter, r *http.Request) {
 		http_handler(w, r, &auth_handler)
 	})
