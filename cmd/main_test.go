@@ -72,7 +72,7 @@ func TestInvalidRequestUsingMutualTls(t *testing.T) {
 	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
 		return false, true
 	})
-	r.Header.Add("Auth-SSL", "on")
+	r.Header.Add("Auth-SSL-Verify", "SUCCESS")
 
 	http_handler(w, r, &auth_handler)
 

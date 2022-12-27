@@ -65,8 +65,8 @@ func http_handler(w http.ResponseWriter, r *http.Request, auth_handler *internal
 		return
 	}
 
-	auth_ssl := r.Header.Get("Auth-SSL")
-	if auth_ssl != "" && auth_ssl != "off" {
+	auth_ssl := r.Header.Get("Auth-SSL-Verify")
+	if auth_ssl != "" && auth_ssl != "NONE" {
 		report_error(auth_protocol, "client certificates are not supported", "504 5.5.4", auth_attempt+1, w)
 		return
 	}
