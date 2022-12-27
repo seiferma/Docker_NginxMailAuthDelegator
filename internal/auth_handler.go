@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"net"
 	"time"
 
 	"github.com/emersion/go-imap/client"
@@ -100,16 +101,30 @@ func (handler *AuthHandler) createValidCredentialsResponse(protocol string) Auth
 	}
 
 	if protocol == "imap" {
-		response.Server = handler.imap_host
+		response.Server = getIp(handler.imap_host)
 		response.Port = 993
 	} else if protocol == "smtp" {
-		response.Server = handler.smtp_host
+		response.Server = getIp(handler.smtp_host)
 		response.Port = 587
 		response.User = handler.smtp_user
 		response.Password = handler.smtp_password
 	}
 
 	return response
+}
+
+func getIp(hostname string) string {
+	ips, err := net.LookupIP(hostname)
+	if err != nil || len(ips) < 1 {
+		return hostname
+	}
+	// prefer IPv4 addresses
+	for _, ip := range ips {
+		if ip.To4() != nil {
+			return ip.String()
+		}
+	}
+	return ips[0].String()
 }
 
 // return: bool (decision), bool (decision is valid)

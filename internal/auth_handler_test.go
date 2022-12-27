@@ -63,6 +63,19 @@ func TestValidCredentialsForSMTPAuthHandler(t *testing.T) {
 	asserts.AssertEquals(t, "foobar", response.Password)
 }
 
+func TestValidCredentialsWithValidHostname(t *testing.T) {
+	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
+		return true, true
+	})
+	handler.smtp_host = "a.root-servers.net"
+	response := handler.HandleAuthRequest("smtp", "test@example.org", "test", 1)
+	asserts.AssertEquals(t, "OK", response.Status)
+	asserts.AssertEquals(t, "198.41.0.4", response.Server)
+	asserts.AssertEquals(t, 587, response.Port)
+	asserts.AssertEquals(t, "barfoo", response.User)
+	asserts.AssertEquals(t, "foobar", response.Password)
+}
+
 func TestValidCachedCredentialsAuthHandler(t *testing.T) {
 	validator_called := false
 	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
