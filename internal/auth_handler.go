@@ -174,7 +174,7 @@ func credentialsValidInImap(imap_host, user, pass string) (bool, bool) {
 	}
 	defer client.Logout()
 
-	if client.Login(user, pass) != nil {
+	if client.Login(user, pass) == nil {
 		return true, true
 	} else {
 		return false, true
