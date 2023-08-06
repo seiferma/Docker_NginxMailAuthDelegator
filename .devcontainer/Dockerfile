@@ -1,15 +1,11 @@
-ARG VARIANT="jammy"
-FROM ubuntu:${VARIANT}
+ARG VERSION
+FROM golang:${VERSION}-alpine
 
-RUN adduser --shell /bin/bash vscode
+RUN adduser --disabled-password vscode
 
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y git openssh-client golang make ca-certificates gcc libc6-dev && \
-    apt-get clean
-
-RUN su - vscode -c "go install golang.org/x/tools/gopls@latest" && \
-    su - vscode -c "go install github.com/go-delve/delve/cmd/dlv@latest" && \
-    su - vscode -c "go install honnef.co/go/tools/cmd/staticcheck@latest" && \
-    su - vscode -c "go install golang.org/x/tools/cmd/goimports@latest" && \
-    su - vscode -c "go install github.com/jandelgado/gcov2lcov@latest" && \
-    echo 'PATH="/home/vscode/go/bin:$PATH"' >> /home/vscode/.profile
+RUN apk update && apk add git openssh-client make ca-certificates gcc musl-dev
+RUN go install golang.org/x/tools/gopls@latest
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+RUN go install honnef.co/go/tools/cmd/staticcheck@latest
+RUN go install golang.org/x/tools/cmd/goimports@latest
+RUN go install github.com/jandelgado/gcov2lcov@latest
