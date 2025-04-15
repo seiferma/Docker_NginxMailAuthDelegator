@@ -1,6 +1,8 @@
 module github.com/seiferma/nginxmailauthdelegator
 
-go 1.18
+go 1.23.0
+
+toolchain go1.23.8
 
 require (
 	github.com/emersion/go-imap v1.2.1
