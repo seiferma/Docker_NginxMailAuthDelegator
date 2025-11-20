@@ -1,16 +1,14 @@
 module github.com/seiferma/nginxmailauthdelegator
 
-go 1.23.0
-
-toolchain go1.23.8
+go 1.24.0
 
 require (
 	github.com/emersion/go-imap v1.2.1
-	golang.org/x/crypto v0.35.0
+	golang.org/x/crypto v0.45.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
 	github.com/emersion/go-sasl v0.0.0-20220912192320-0145f2c60ead // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 )
