@@ -1,5 +1,5 @@
 ARG VERSION
-FROM golang:${VERSION}-alpine
+FROM golang:23-alpine
 
 RUN adduser --disabled-password vscode
 
