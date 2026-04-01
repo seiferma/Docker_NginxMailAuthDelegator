@@ -6,6 +6,7 @@ require (
 	github.com/emersion/go-imap v1.2.1
 	golang.org/x/crypto v0.45.0
 	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
