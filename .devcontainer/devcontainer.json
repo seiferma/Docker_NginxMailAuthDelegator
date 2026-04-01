@@ -3,8 +3,20 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-	"workspaceMount": "",
-	"runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined", "--volume=${localWorkspaceFolder}:/workspaces/${localWorkspaceFolderBasename}:Z" ],
+	"capAdd": ["SYS_PTRACE"],
+	"mounts": [
+		{
+			"source": "${localEnv:HOME}/.config/opencode",
+			"target": "/home/vscode/.config/opencode",
+			"type": "bind"
+		},
+		{
+			"source": "${localEnv:HOME}/.local/share/opencode",
+			"target": "/home/vscode/.local/share",
+			"type": "bind"
+		}
+	],
+	"postCreateCommand": "curl -fsSL https://opencode.ai/install | bash",
 	"customizations": {
 		"vscode": {
 			"settings": {
@@ -21,6 +33,9 @@
 	},
 	"containerEnv": {
 		"GOPATH": "/home/vscode/go"
+	},
+	"remoteEnv": {
+		"PATH": "${containerEnv:PATH}:/home/vscode/.opencode/bin"
 	},
 	"forwardPorts": [8080],
 	"remoteUser": "vscode",
