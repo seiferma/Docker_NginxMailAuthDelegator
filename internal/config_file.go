@@ -3,7 +3,7 @@ package internal
 import (
 	"os"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type Configuration struct {
@@ -26,12 +26,14 @@ func (c *Configuration) applyDefaults() {
 }
 
 func (c *Configuration) Load(file_path string) error {
-
-	yamlFile, err := os.ReadFile(file_path)
+	file, err := os.Open(file_path)
 	if err != nil {
 		return err
 	}
-	err = yaml.UnmarshalStrict(yamlFile, c)
+
+	decoder := yaml.NewDecoder(file)
+	decoder.KnownFields(true)
+	err = decoder.Decode(c)
 	if err != nil {
 		return err
 	}
