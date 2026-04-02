@@ -32,7 +32,7 @@ func AssertStringArraysEquals(t *testing.T, expected, actual []string) {
 	if len(expected) != len(actual) {
 		t.Fatalf("Expected %v elements but got %v elements.", len(expected), len(actual))
 	}
-	for i := 0; i < len(expected); i++ {
+	for i := range expected {
 		if expected[i] != actual[i] {
 			t.Fatalf("Expected %v at position %v, but got %v.", expected[i], i, actual[i])
 		}

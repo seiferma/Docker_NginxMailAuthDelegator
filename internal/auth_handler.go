@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/emersion/go-imap/client"
@@ -108,10 +109,11 @@ func (handler *AuthHandler) createValidCredentialsResponse(protocol string) Auth
 		Status: "OK",
 	}
 
-	if protocol == "imap" {
+	switch protocol {
+	case "imap":
 		response.Server = getIp(handler.imap_host)
 		response.Port = 993
-	} else if protocol == "smtp" {
+	case "smtp":
 		response.Server = getIp(handler.smtp_host)
 		response.Port = 587
 		response.User = handler.smtp_user
@@ -205,10 +207,5 @@ func credentialsValidInImap(imap_host string, imap_port int, user, pass, ca_cert
 }
 
 func contains(strings []string, search string) bool {
-	for _, value := range strings {
-		if value == search {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(strings, search)
 }

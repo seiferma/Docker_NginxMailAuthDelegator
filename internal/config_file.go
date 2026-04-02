@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -27,7 +27,7 @@ func (c *Configuration) applyDefaults() {
 
 func (c *Configuration) Load(file_path string) error {
 
-	yamlFile, err := ioutil.ReadFile(file_path)
+	yamlFile, err := os.ReadFile(file_path)
 	if err != nil {
 		return err
 	}
