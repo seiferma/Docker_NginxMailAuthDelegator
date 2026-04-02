@@ -8,7 +8,7 @@ import (
 )
 
 func TestNonWhitelistedCredentialsAuthHandler(t *testing.T) {
-	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
+	handler := createAuthHandler(t, func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		t.Fatal("should not be called")
 		return false, false
 	})
@@ -19,7 +19,7 @@ func TestNonWhitelistedCredentialsAuthHandler(t *testing.T) {
 }
 
 func TestInvalidWhitelistedCredentialsAuthHandler(t *testing.T) {
-	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
+	handler := createAuthHandler(t, func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return false, true
 	})
 	response := handler.HandleAuthRequest("imap", "test@example.org", "test", 1)
@@ -29,7 +29,7 @@ func TestInvalidWhitelistedCredentialsAuthHandler(t *testing.T) {
 }
 
 func TestInvalidCredentialsMaxTriesAuthHandler(t *testing.T) {
-	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
+	handler := createAuthHandler(t, func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		t.Fatal("should not be called")
 		return false, false
 	})
@@ -40,7 +40,7 @@ func TestInvalidCredentialsMaxTriesAuthHandler(t *testing.T) {
 }
 
 func TestValidCredentialsForIMAPAuthHandler(t *testing.T) {
-	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
+	handler := createAuthHandler(t, func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return true, true
 	})
 	response := handler.HandleAuthRequest("imap", "test@example.org", "test", 1)
@@ -52,7 +52,7 @@ func TestValidCredentialsForIMAPAuthHandler(t *testing.T) {
 }
 
 func TestValidCredentialsForSMTPAuthHandler(t *testing.T) {
-	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
+	handler := createAuthHandler(t, func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return true, true
 	})
 	response := handler.HandleAuthRequest("smtp", "test@example.org", "test", 1)
@@ -64,7 +64,7 @@ func TestValidCredentialsForSMTPAuthHandler(t *testing.T) {
 }
 
 func TestValidCredentialsWithValidHostname(t *testing.T) {
-	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
+	handler := createAuthHandler(t, func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return true, true
 	})
 	handler.smtp_host = "a.root-servers.net"
@@ -78,7 +78,7 @@ func TestValidCredentialsWithValidHostname(t *testing.T) {
 
 func TestValidCachedCredentialsAuthHandler(t *testing.T) {
 	validator_called := false
-	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
+	handler := createAuthHandler(t, func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		if validator_called {
 			t.Fatal("Validator should not be called twice.")
 		}
@@ -96,7 +96,7 @@ func TestValidCachedCredentialsAuthHandler(t *testing.T) {
 
 func TestValidCachedButExpiredCredentialsAuthHandler(t *testing.T) {
 	validator_calls := 0
-	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
+	handler := createAuthHandler(t, func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		validator_calls++
 		return true, true
 	})
@@ -120,7 +120,7 @@ func TestValidCachedButExpiredCredentialsAuthHandler(t *testing.T) {
 
 func TestInvalidCachedCredentialsAuthHandler(t *testing.T) {
 	validator_called := false
-	handler := createAuthHandler(t, func(imap_host, user, pass string) (bool, bool) {
+	handler := createAuthHandler(t, func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		if validator_called {
 			t.Fatal("Validator should not be called twice.")
 		}

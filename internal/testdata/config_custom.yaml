@@ -1,0 +1,8 @@
+users:
+- some_user
+imap_host: imap.example.org
+imap_port: 1993
+smtp_host: smtp.example.org
+smtp_user: barfoo
+smtp_pass: foobar
+ca_cert_file: /custom/path/ca.crt

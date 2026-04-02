@@ -14,7 +14,7 @@ import (
 func TestInvalidRequestMissingAttempts(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
-	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+	auth_handler := createAuthHandler(func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return false, true
 	})
 	r.Header.Del("Auth-Login-Attempt")
@@ -28,7 +28,7 @@ func TestInvalidRequestMissingAttempts(t *testing.T) {
 func TestInvalidRequestMissingClientIp(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
-	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+	auth_handler := createAuthHandler(func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return false, true
 	})
 	r.Header.Del("Client-IP")
@@ -42,7 +42,7 @@ func TestInvalidRequestMissingClientIp(t *testing.T) {
 func TestInvalidRequestMissingProtocol(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
-	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+	auth_handler := createAuthHandler(func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return false, true
 	})
 	r.Header.Del("Auth-Protocol")
@@ -56,7 +56,7 @@ func TestInvalidRequestMissingProtocol(t *testing.T) {
 func TestInvalidRequestUnsupportedMethod(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := createRequest(1, "cram-md5", "smtp", "foo", "bar", "127.0.0.1")
-	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+	auth_handler := createAuthHandler(func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return false, true
 	})
 
@@ -69,7 +69,7 @@ func TestInvalidRequestUnsupportedMethod(t *testing.T) {
 func TestInvalidRequestUsingMutualTls(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
-	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+	auth_handler := createAuthHandler(func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return false, true
 	})
 	r.Header.Add("Auth-SSL-Verify", "SUCCESS")
@@ -83,7 +83,7 @@ func TestInvalidRequestUsingMutualTls(t *testing.T) {
 func TestInvalidSmtpCredentialsAuthRequest(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
-	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+	auth_handler := createAuthHandler(func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return false, true
 	})
 
@@ -97,7 +97,7 @@ func TestInvalidSmtpCredentialsAuthRequest(t *testing.T) {
 func TestInvalidImapCredentialsAuthRequest(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := createRequest(1, "plain", "imap", "foo", "bar", "127.0.0.1")
-	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+	auth_handler := createAuthHandler(func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return false, true
 	})
 
@@ -111,7 +111,7 @@ func TestInvalidImapCredentialsAuthRequest(t *testing.T) {
 func TestInvalidCredentialsTooManyTriesAuthRequest(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := createRequest(3, "plain", "imap", "foo", "bar", "127.0.0.1")
-	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+	auth_handler := createAuthHandler(func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return false, true
 	})
 
@@ -124,7 +124,7 @@ func TestInvalidCredentialsTooManyTriesAuthRequest(t *testing.T) {
 func TestValidImapCredentialsAuthRequest(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := createRequest(1, "plain", "imap", "foo", "bar", "127.0.0.1")
-	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+	auth_handler := createAuthHandler(func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return true, true
 	})
 
@@ -140,7 +140,7 @@ func TestValidImapCredentialsAuthRequest(t *testing.T) {
 func TestValidImtpCredentialsAuthRequest(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := createRequest(1, "plain", "smtp", "foo", "bar", "127.0.0.1")
-	auth_handler := createAuthHandler(func(imap_host, user, pass string) (bool, bool) {
+	auth_handler := createAuthHandler(func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
 		return true, true
 	})
 

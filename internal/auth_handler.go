@@ -1,7 +1,11 @@
 package internal
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
 	"net"
+	"os"
 	"time"
 
 	"github.com/emersion/go-imap/client"
@@ -16,13 +20,15 @@ type authCacheEntry struct {
 	expiry        time.Time
 }
 
-type ImapValidator func(imap_host, user, pass string) (bool, bool)
+type ImapValidator func(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool)
 
 type AuthHandler struct {
 	valid_usernames      []string
 	auth_cache           map[string]authCacheEntry
 	cache_entry_validity time.Duration
 	imap_host            string
+	imap_port            int
+	ca_cert_file         string
 	smtp_host            string
 	smtp_user            string
 	smtp_password        string
@@ -48,6 +54,8 @@ func CreateAuthHandlerWithCustomCallbacks(cfg Configuration, imap_validator Imap
 	return AuthHandler{
 		valid_usernames:      cfg.WhitelistedUsers,
 		imap_host:            cfg.ImapServer,
+		imap_port:            cfg.ImapPort,
+		ca_cert_file:         cfg.CaCertFile,
 		imap_validator:       imap_validator,
 		smtp_host:            cfg.SmtpServer,
 		smtp_user:            cfg.SmtpUser,
@@ -70,7 +78,7 @@ func (handler *AuthHandler) HandleAuthRequest(protocol, user, pass string, attem
 
 	// cache content is invalid, so perform authentication
 	if !valid {
-		decision, valid = handler.imap_validator(handler.imap_host, user, pass)
+		decision, valid = handler.imap_validator(handler.imap_host, handler.imap_port, user, pass, handler.ca_cert_file)
 		if decision && valid {
 			handler.addCredentialsToCache(user, password_bytes)
 		}
@@ -167,8 +175,23 @@ func (handler *AuthHandler) addCredentialsToCache(user string, pass []byte) erro
 }
 
 // return: bool (decision), bool (decision is valid)
-func credentialsValidInImap(imap_host, user, pass string) (bool, bool) {
-	client, err := client.DialTLS(imap_host+":993", nil)
+func credentialsValidInImap(imap_host string, imap_port int, user, pass, ca_cert_file string) (bool, bool) {
+	// Load CA certificate file
+	caCert, err := os.ReadFile(ca_cert_file)
+	if err != nil {
+		return false, false
+	}
+
+	caCertPool := x509.NewCertPool()
+	if !caCertPool.AppendCertsFromPEM(caCert) {
+		return false, false
+	}
+
+	tlsConfig := &tls.Config{
+		RootCAs: caCertPool,
+	}
+
+	client, err := client.DialTLS(fmt.Sprintf("%s:%d", imap_host, imap_port), tlsConfig)
 	if err != nil {
 		return false, false
 	}
