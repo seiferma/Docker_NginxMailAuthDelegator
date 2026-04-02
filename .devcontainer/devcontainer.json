@@ -3,7 +3,9 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-	"capAdd": ["SYS_PTRACE"],
+	"capAdd": [
+		"SYS_PTRACE"
+	],
 	"mounts": [
 		{
 			"source": "${localEnv:HOME}/.config/opencode",
@@ -22,7 +24,13 @@
 			"settings": {
 				"go.toolsManagement.checkForUpdates": "local",
 				"go.useLanguageServer": true,
-				"go.gopath": "/home/vscode/go"
+				"go.gopath": "/home/vscode/go",
+				"go.inferGopath": false,
+				"go.toolsEnvVars": {
+					"GO111MODULE": "on"
+				},
+				"go.formatTool": "goimports",
+				"markiscodecoverage.searchCriteria": "build/coverage.lcov"
 			},
 			"extensions": [
 				"golang.Go",
@@ -37,7 +45,9 @@
 	"remoteEnv": {
 		"PATH": "${containerEnv:PATH}:/home/vscode/.opencode/bin"
 	},
-	"forwardPorts": [8080],
+	"forwardPorts": [
+		8080
+	],
 	"remoteUser": "vscode",
 	"containerUser": "vscode"
 }
